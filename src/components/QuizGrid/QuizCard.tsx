@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Card, Text, Badge, Group, Button, Stack } from '@mantine/core';
 import { IconUsers, IconClock, IconTag } from '@tabler/icons-react';
 import { Quiz } from '@/types/quiz';
@@ -10,8 +11,14 @@ interface QuizCardProps {
 }
 
 export function QuizCard({ quiz, onTakeQuiz }: QuizCardProps) {
+  const router = useRouter();
+
   const handleTakeQuiz = () => {
-    onTakeQuiz?.(quiz.id);
+    if (onTakeQuiz) {
+      onTakeQuiz(quiz.id);
+    } else {
+      router.push(`/quiz/${quiz.id}`);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -57,7 +64,7 @@ export function QuizCard({ quiz, onTakeQuiz }: QuizCardProps) {
             <Group gap={4}>
               <IconUsers size={16} color="gray" />
               <Text size="xs" c="dimmed">
-                Quiz #{quiz.id}
+                {quiz.questions ? `${quiz.questions.length} questions` : `Quiz #${quiz.id}`}
               </Text>
             </Group>
             <Group gap={4}>

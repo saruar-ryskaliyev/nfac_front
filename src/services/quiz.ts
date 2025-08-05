@@ -40,9 +40,12 @@ export const quizService = {
     limit: number;
     pages: number;
   }> {
-    const response = await api.get<QuizPaginatedResponse>("/api/v1/quizzes/search", {
-      params,
-    });
+    const response = await api.get<QuizPaginatedResponse>(
+      "/api/v1/quizzes/search",
+      {
+        params,
+      }
+    );
     return {
       items: response.data.data.data,
       total: response.data.data.meta.total,

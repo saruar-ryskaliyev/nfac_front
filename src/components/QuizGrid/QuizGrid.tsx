@@ -83,7 +83,7 @@ export function QuizGrid({ initialParams, onTakeQuiz }: QuizGridProps) {
       </Group>
 
       <SimpleGrid
-        cols={{ base: 1, sm: 2, md: 3, lg: 4 }}
+        cols={{ base: 1, sm: 2, md: 2, lg: 4 }}
         spacing="md"
         verticalSpacing="md"
       >

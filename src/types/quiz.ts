@@ -13,6 +13,17 @@ export interface Quiz {
   creator_id: number;
   is_public: boolean;
   tags: Tag[];
+  questions?: Question[]; // Optional for list view, present in detail view
+  created_at: string;
+  updated_at: string | null;
+  deleted_at: string | null;
+}
+
+export interface Option {
+  id: number;
+  question_id: number;
+  option_text: string;
+  is_correct: boolean;
   created_at: string;
   updated_at: string | null;
   deleted_at: string | null;
@@ -20,10 +31,14 @@ export interface Quiz {
 
 export interface Question {
   id: number;
-  text: string;
-  options: string[];
-  correct_answer: number;
-  explanation?: string;
+  quiz_id: number;
+  question_text: string;
+  question_type: 'single' | 'text' | 'multiple';
+  points: number;
+  options: Option[];
+  created_at: string;
+  updated_at: string | null;
+  deleted_at: string | null;
 }
 
 export interface QuizInCreate {
