@@ -5,6 +5,7 @@ import "@mantine/core/styles.css";
 
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
 import { AuthProvider } from "@/context/AuthContext";
+import { SearchProvider } from "@/context/SearchContext";
 import { Header } from "@/components/Header";
 
 const geistSans = Geist({
@@ -41,8 +42,10 @@ export default function RootLayout({
       >
         <MantineProvider theme={theme} defaultColorScheme="light">
           <AuthProvider>
-            <Header />
-            {children}
+            <SearchProvider>
+              <Header />
+              {children}
+            </SearchProvider>
           </AuthProvider>
         </MantineProvider>
       </body>

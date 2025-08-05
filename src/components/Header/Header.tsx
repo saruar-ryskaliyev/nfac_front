@@ -18,6 +18,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch, IconUser, IconLogout, IconSettings } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
+import { useSearch } from '@/context/SearchContext';
 
 interface HeaderProps {
   height?: number;
@@ -25,8 +26,8 @@ interface HeaderProps {
 
 export function Header({ height = 60 }: HeaderProps) {
   const [opened, { toggle, close }] = useDisclosure(false);
-  const [searchValue, setSearchValue] = useState('');
   const { user, isAuthenticated, signout } = useAuth();
+  const { searchQuery, setSearchQuery } = useSearch();
   const router = useRouter();
 
   const handleProfileClick = () => {
@@ -40,11 +41,13 @@ export function Header({ height = 60 }: HeaderProps) {
     router.push('/');
   };
 
+  const handleSearchInput = (value: string) => {
+    setSearchQuery(value);
+  };
+
   const handleSearch = () => {
-    if (searchValue.trim()) {
-      // Handle search functionality here
-      console.log('Searching for:', searchValue);
-    }
+    // Search is handled automatically via context and debounce
+    // This function can be used for additional search actions if needed
   };
 
 
@@ -80,8 +83,8 @@ export function Header({ height = 60 }: HeaderProps) {
             {/* Middle section - Search (hidden on mobile) */}
             <TextInput
               placeholder="Search quizzes..."
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.currentTarget.value)}
+              value={searchQuery}
+              onChange={(event) => handleSearchInput(event.currentTarget.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   handleSearch();
@@ -200,8 +203,8 @@ export function Header({ height = 60 }: HeaderProps) {
         <Stack gap="md">
           <TextInput
             placeholder="Search quizzes..."
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.currentTarget.value)}
+            value={searchQuery}
+            onChange={(event) => handleSearchInput(event.currentTarget.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 handleSearch();

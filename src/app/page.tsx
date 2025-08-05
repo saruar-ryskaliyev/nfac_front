@@ -1,11 +1,10 @@
-import { Welcome } from '../components/Welcome/Welcome';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
+import { QuizGrid } from "@/components/QuizGrid";
+import { Container } from "@mantine/core";
 
 export default function HomePage() {
   return (
-    <>
-      <Welcome />
-      <ColorSchemeToggle />
-    </>
+    <Container size="xl" py="md">
+      <QuizGrid />
+    </Container>
   );
 }
