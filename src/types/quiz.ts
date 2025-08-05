@@ -44,24 +44,29 @@ export interface Question {
 export interface QuizInCreate {
   title: string;
   description: string;
-  questions: QuestionInCreate[];
-  tags: string[];
   is_public?: boolean;
+  tag_names: string[];
+  questions: QuestionInCreate[];
 }
 
 export interface QuestionInCreate {
-  text: string;
-  options: string[];
-  correct_answer: number;
-  explanation?: string;
+  question_text: string;
+  question_type: 'single' | 'text' | 'multiple';
+  points: number;
+  options: OptionInCreate[];
+}
+
+export interface OptionInCreate {
+  option_text: string;
+  is_correct: boolean;
 }
 
 export interface QuizInUpdate {
   title?: string;
   description?: string;
-  questions?: QuestionInCreate[];
-  tags?: string[];
   is_public?: boolean;
+  tag_names?: string[];
+  questions?: QuestionInCreate[];
 }
 
 export interface QuizResponse {

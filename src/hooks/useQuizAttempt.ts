@@ -240,6 +240,15 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
     try {
       setState((prev) => ({ ...prev, isSubmitting: true, error: null }));
 
+      // IMPORTANT: Submit the current question's answer before finishing the quiz
+      const currentQuestion = state.quiz?.questions?.[state.currentQuestionIndex];
+      if (currentQuestion) {
+        const currentUserAnswer = state.answers.find(a => a.questionId === currentQuestion.id);
+        if (currentUserAnswer?.answer !== null && !currentUserAnswer?.submitted) {
+          await submitAnswer(currentQuestion.id);
+        }
+      }
+
       const result = await attemptService.submitAttempt(state.attempt.id);
 
       setState((prev) => ({
@@ -261,7 +270,7 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
       }));
       return false;
     }
-  }, [state.attempt]);
+  }, [state.attempt, state.quiz, state.currentQuestionIndex, state.answers, submitAnswer]);
 
   const resetAttempt = useCallback(() => {
     setState({

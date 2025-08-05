@@ -21,7 +21,7 @@ interface QuizGridProps {
 }
 
 export function QuizGrid({ initialParams, onTakeQuiz }: QuizGridProps) {
-  const { searchQuery } = useSearch();
+  const { searchQuery, selectedTag } = useSearch();
   const {
     quizzes,
     loading,
@@ -30,7 +30,7 @@ export function QuizGrid({ initialParams, onTakeQuiz }: QuizGridProps) {
     page,
     pages,
     setPage,
-  } = useQuizzes(initialParams, searchQuery);
+  } = useQuizzes(initialParams, searchQuery, selectedTag);
 
   if (loading) {
     return (

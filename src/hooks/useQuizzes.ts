@@ -24,7 +24,7 @@ interface UseQuizzesActions {
 
 interface UseQuizzesReturn extends UseQuizzesState, UseQuizzesActions {}
 
-export function useQuizzes(initialParams?: QuizSearchParams, externalSearchQuery?: string): UseQuizzesReturn {
+export function useQuizzes(initialParams?: QuizSearchParams, externalSearchQuery?: string, selectedTag?: string | null): UseQuizzesReturn {
   const [state, setState] = useState<UseQuizzesState>({
     quizzes: [],
     loading: true,
@@ -48,10 +48,17 @@ export function useQuizzes(initialParams?: QuizSearchParams, externalSearchQuery
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      // Use search endpoint if there's a search query, otherwise use getAllQuizzes
-      const data = debouncedSearchQuery.trim() 
-        ? await quizService.searchQuizzes({ ...searchParams, search: debouncedSearchQuery })
-        : await quizService.getAllQuizzes(searchParams);
+      // Build search parameters including tag filter
+      const params = {
+        ...searchParams,
+        ...(selectedTag && { tag: selectedTag }),
+        ...(debouncedSearchQuery.trim() && { search: debouncedSearchQuery }),
+      };
+      
+      // Use search endpoint if there's a search query or tag filter, otherwise use getAllQuizzes
+      const data = debouncedSearchQuery.trim() || selectedTag
+        ? await quizService.searchQuizzes(params)
+        : await quizService.getAllQuizzes(params);
       
       setState(prev => ({
         ...prev,
@@ -70,7 +77,7 @@ export function useQuizzes(initialParams?: QuizSearchParams, externalSearchQuery
         loading: false,
       }));
     }
-  }, [searchParams, debouncedSearchQuery]);
+  }, [searchParams, debouncedSearchQuery, selectedTag]);
 
   // Handle external search query changes with debounce
   useEffect(() => {

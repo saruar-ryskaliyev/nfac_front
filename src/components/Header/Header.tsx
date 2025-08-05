@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   Group,
   Text,
-  TextInput,
   Avatar,
   ActionIcon,
   Burger,
@@ -16,9 +15,8 @@ import {
   rem,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconUser, IconLogout, IconSettings } from '@tabler/icons-react';
+import { IconUser, IconLogout, IconSettings, IconShield } from '@tabler/icons-react';
 import { useAuth } from '@/context/AuthContext';
-import { useSearch } from '@/context/SearchContext';
 
 interface HeaderProps {
   height?: number;
@@ -27,7 +25,6 @@ interface HeaderProps {
 export function Header({ height = 60 }: HeaderProps) {
   const [opened, { toggle, close }] = useDisclosure(false);
   const { user, isAuthenticated, signout } = useAuth();
-  const { searchQuery, setSearchQuery } = useSearch();
   const router = useRouter();
 
   const handleProfileClick = () => {
@@ -39,15 +36,6 @@ export function Header({ height = 60 }: HeaderProps) {
   const handleSignout = () => {
     signout();
     router.push('/');
-  };
-
-  const handleSearchInput = (value: string) => {
-    setSearchQuery(value);
-  };
-
-  const handleSearch = () => {
-    // Search is handled automatically via context and debounce
-    // This function can be used for additional search actions if needed
   };
 
 
@@ -80,48 +68,9 @@ export function Header({ height = 60 }: HeaderProps) {
               NFactorial Quiz
             </Text>
 
-            {/* Middle section - Search (hidden on mobile) */}
-            <TextInput
-              placeholder="Search quizzes..."
-              value={searchQuery}
-              onChange={(event) => handleSearchInput(event.currentTarget.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  handleSearch();
-                }
-              }}
-              rightSection={
-                <ActionIcon 
-                  variant="light" 
-                  onClick={handleSearch}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <IconSearch style={{ width: rem(16), height: rem(16) }} />
-                </ActionIcon>
-              }
-              style={{ 
-                minWidth: '300px',
-                maxWidth: '400px',
-                flex: 1,
-                margin: '0 2rem'
-              }}
-              visibleFrom="md"
-            />
 
             {/* Right section - Profile and mobile menu */}
             <Group gap="md">
-              {/* Search icon for mobile */}
-              <ActionIcon
-                variant="light"
-                size="lg"
-                hiddenFrom="md"
-                onClick={() => {
-                  // For mobile, you might want to open a search modal or drawer
-                  console.log('Mobile search clicked');
-                }}
-              >
-                <IconSearch style={{ width: rem(18), height: rem(18) }} />
-              </ActionIcon>
 
               {/* Profile section */}
               {isAuthenticated && user ? (
@@ -149,6 +98,17 @@ export function Header({ height = 60 }: HeaderProps) {
 
                   <Menu.Dropdown>
                     <Menu.Label>Account</Menu.Label>
+                    {user.role === 'admin' && (
+                      <>
+                        <Menu.Item 
+                          leftSection={<IconShield style={{ width: rem(14), height: rem(14) }} />}
+                          onClick={() => router.push('/admin')}
+                        >
+                          Admin Dashboard
+                        </Menu.Item>
+                        <Menu.Divider />
+                      </>
+                    )}
                     <Menu.Item 
                       leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                     >
@@ -201,29 +161,6 @@ export function Header({ height = 60 }: HeaderProps) {
         title="Menu"
       >
         <Stack gap="md">
-          <TextInput
-            placeholder="Search quizzes..."
-            value={searchQuery}
-            onChange={(event) => handleSearchInput(event.currentTarget.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                handleSearch();
-                close();
-              }
-            }}
-            rightSection={
-              <ActionIcon 
-                variant="light" 
-                onClick={() => {
-                  handleSearch();
-                  close();
-                }}
-              >
-                <IconSearch style={{ width: rem(16), height: rem(16) }} />
-              </ActionIcon>
-            }
-          />
-
           {!isAuthenticated ? (
             <Button 
               variant="filled"
@@ -239,6 +176,19 @@ export function Header({ height = 60 }: HeaderProps) {
               <Text size="sm" c="dimmed">
                 Signed in as {user?.username || user?.email}
               </Text>
+              {user?.role === 'admin' && (
+                <Button 
+                  variant="light"
+                  color="blue"
+                  leftSection={<IconShield style={{ width: rem(16), height: rem(16) }} />}
+                  onClick={() => {
+                    router.push('/admin');
+                    close();
+                  }}
+                >
+                  Admin Dashboard
+                </Button>
+              )}
               <Button 
                 variant="light"
                 color="red"
