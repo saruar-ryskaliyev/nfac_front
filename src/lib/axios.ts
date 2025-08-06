@@ -3,7 +3,7 @@ import { config } from './config';
 
 const api = axios.create({
   baseURL: config.apiBaseUrl,
-  timeout: 10000,
+  timeout: 60000, // 60 seconds for AI generation endpoints
   headers: {
     'Content-Type': 'application/json',
   },

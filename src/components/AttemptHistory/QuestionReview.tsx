@@ -218,7 +218,6 @@ export function QuestionReview({
               icon={<IconAlertCircle size="1rem" />}
               color="blue"
               variant="light"
-              size="sm"
             >
               Text answers require manual grading by the instructor.
             </Alert>

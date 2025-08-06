@@ -45,7 +45,9 @@ export function QuizGenerationForm({ onQuizGenerated }: QuizGenerationFormProps)
       setError(null);
       setSuccess(false);
 
-      await quizService.generateQuiz(formData);
+      const generatedQuiz = await quizService.generateQuiz(formData);
+      console.log('Generated quiz:', generatedQuiz);
+      console.log('Generated quiz questions:', generatedQuiz.questions?.map(q => ({ id: q.id, text: q.question_text?.substring(0, 50) + '...' })));
       
       setSuccess(true);
       setFormData({

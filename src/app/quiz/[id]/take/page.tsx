@@ -29,6 +29,8 @@ export default function QuizTakePage() {
         setLoading(true);
         setError(null);
         const quizData = await quizService.getQuizById(parseInt(quizId));
+        console.log('Fetched quiz for taking:', quizData);
+        console.log('Quiz questions for taking:', quizData.questions?.map(q => ({ id: q.id, text: q.question_text?.substring(0, 50) + '...' })));
         setQuiz(quizData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch quiz');

@@ -66,6 +66,9 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
     try {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
+      console.log('Starting attempt for quiz:', quiz.id);
+      console.log('Quiz questions:', quiz.questions?.map(q => ({ id: q.id, text: q.question_text?.substring(0, 50) + '...' })));
+
       const attempt = await attemptService.startQuizAttempt(quiz.id);
 
       // Initialize answers array for all questions
@@ -74,6 +77,8 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
         answer: null,
         submitted: false,
       }));
+
+      console.log('Initialized answers for question IDs:', initialAnswers.map(a => a.questionId));
 
       setState((prev) => ({
         ...prev,
@@ -131,7 +136,10 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
 
       const question = state.quiz?.questions?.find((q) => q.id === questionId);
       if (!question) {
-        setState((prev) => ({ ...prev, error: "Question not found" }));
+        console.error('Question not found!');
+        console.error('Looking for question ID:', questionId);
+        console.error('Available questions:', state.quiz?.questions?.map(q => ({ id: q.id, text: q.question_text?.substring(0, 30) + '...' })));
+        setState((prev) => ({ ...prev, error: `Question ${questionId} not found in loaded quiz data` }));
         return false;
       }
 
@@ -168,6 +176,8 @@ export function useQuizAttempt(): UseQuizAttemptReturn {
           answerSubmit.selected_option_ids = selectedOptionIds;
         }
 
+        console.log('Submitting answer:', answerSubmit);
+        
         await answerService.submitAnswersToAttempt(state.attempt.id, [
           answerSubmit,
         ]);
