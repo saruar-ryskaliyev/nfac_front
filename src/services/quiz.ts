@@ -6,6 +6,9 @@ import {
   QuizResponse,
   QuizPaginatedResponse,
   QuizSearchParams,
+  LeaderboardData,
+  LeaderboardResponse,
+  QuizGenerateRequest,
 } from "@/types/quiz";
 
 export const quizService = {
@@ -70,5 +73,15 @@ export const quizService = {
 
   async deleteQuiz(quizId: number): Promise<void> {
     await api.delete(`/api/v1/quizzes/${quizId}`);
+  },
+
+  async getLeaderboard(quizId: number): Promise<LeaderboardData> {
+    const response = await api.get<LeaderboardResponse>(`/api/v1/quizzes/${quizId}/leaderboard`);
+    return response.data.data;
+  },
+
+  async generateQuiz(generateData: QuizGenerateRequest): Promise<Quiz> {
+    const response = await api.post<QuizResponse>("/api/v1/quizzes/generate", generateData);
+    return response.data.data;
   },
 };

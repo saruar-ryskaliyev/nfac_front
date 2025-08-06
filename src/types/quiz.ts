@@ -114,3 +114,30 @@ export interface ValidationError {
   msg: string;
   type: string;
 }
+
+export interface LeaderboardEntry {
+  user_id: number;
+  username: string;
+  score: number;
+  attempt_number: number;
+  finished_at: string;
+}
+
+export interface LeaderboardData {
+  quiz_id: number;
+  quiz_title: string;
+  entries: LeaderboardEntry[];
+}
+
+export interface LeaderboardResponse {
+  message: string;
+  data: LeaderboardData;
+  detail: any;
+}
+
+export interface QuizGenerateRequest {
+  prompt: string;
+  num_questions: number;
+  is_public?: boolean;
+  tag_names?: string[];
+}

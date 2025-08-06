@@ -7,6 +7,7 @@ import { IconShield, IconAlertCircle } from "@tabler/icons-react";
 import { useAuth } from "@/context/AuthContext";
 import { AdminDashboard } from "@/components/Admin/AdminDashboard";
 import { QuizManagement } from "@/components/Admin/QuizManagement";
+import { QuizGenerationForm } from "@/components/Admin/QuizGenerationForm";
 import { UserManagement } from "@/components/Admin/UserManagement";
 import { TagManagement } from "@/components/Admin/TagManagement";
 
@@ -53,12 +54,17 @@ export default function AdminPage() {
         </Stack>
 
         {/* Admin Tabs */}
-        <Tabs defaultValue="quizzes" orientation="horizontal">
+        <Tabs defaultValue="generate" orientation="horizontal">
           <Tabs.List>
+            <Tabs.Tab value="generate">Generate Quiz</Tabs.Tab>
             <Tabs.Tab value="quizzes">Quiz Management</Tabs.Tab>
             {/* <Tabs.Tab value="users">User Management</Tabs.Tab> */}
             <Tabs.Tab value="tags">Tag Management</Tabs.Tab>
           </Tabs.List>
+
+          <Tabs.Panel value="generate" pt="xl">
+            <QuizGenerationForm />
+          </Tabs.Panel>
 
           <Tabs.Panel value="quizzes" pt="xl">
             <QuizManagement />

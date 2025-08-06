@@ -1,11 +1,31 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Stack, Title, Text, Badge, Group, Card, Button, Divider } from '@mantine/core';
-import { IconTag, IconClock, IconUser, IconTrophy } from '@tabler/icons-react';
-import { Quiz, Question, Option } from '@/types/quiz';
-import { AttemptHistory } from '@/components/AttemptHistory';
-import { useAuth } from '@/context/AuthContext';
+import { useRouter } from "next/navigation";
+import {
+  Stack,
+  Title,
+  Text,
+  Badge,
+  Group,
+  Card,
+  Button,
+  Divider,
+  Tabs,
+} from "@mantine/core";
+import {
+  IconTag,
+  IconClock,
+  IconUser,
+  IconTrophy,
+  IconEye,
+  IconHistory,
+  IconChartBar,
+  IconList,
+} from "@tabler/icons-react";
+import { Quiz, Question, Option } from "@/types/quiz";
+import { AttemptHistory } from "@/components/AttemptHistory";
+import { QuizLeaderboard } from "@/components/QuizLeaderboard";
+import { useAuth } from "@/context/AuthContext";
 
 interface QuizDetailProps {
   quiz: Quiz;
@@ -19,12 +39,12 @@ interface QuestionCardProps {
 function QuestionCard({ question, questionNumber }: QuestionCardProps) {
   const formatQuestionType = (type: string) => {
     switch (type) {
-      case 'single':
-        return 'Single Choice';
-      case 'multiple':
-        return 'Multiple Choice';
-      case 'text':
-        return 'Text Answer';
+      case "single":
+        return "Single Choice";
+      case "multiple":
+        return "Multiple Choice";
+      case "text":
+        return "Text Answer";
       default:
         return type;
     }
@@ -59,22 +79,16 @@ function QuestionCard({ question, questionNumber }: QuestionCardProps) {
             </Text>
             {question.options.map((option, index) => (
               <Group key={option.id} gap="xs">
-                <Badge
-                  variant="outline"
-                  color="gray"
-                  size="sm"
-                >
+                <Badge variant="outline" color="gray" size="sm">
                   {String.fromCharCode(65 + index)}
                 </Badge>
-                <Text size="sm">
-                  {option.option_text}
-                </Text>
+                <Text size="sm">{option.option_text}</Text>
               </Group>
             ))}
           </Stack>
         )}
 
-        {question.question_type === 'text' && question.options.length === 0 && (
+        {question.question_type === "text" && question.options.length === 0 && (
           <Text size="sm" c="dimmed" fs="italic">
             This is a text-based question requiring a written answer.
           </Text>
@@ -93,16 +107,114 @@ export function QuizDetail({ quiz }: QuizDetailProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const totalPoints = quiz.questions?.reduce((sum, question) => sum + question.points, 0) || 0;
+  const totalPoints =
+    quiz.questions?.reduce((sum, question) => sum + question.points, 0) || 0;
+
+  const OverviewTab = () => (
+    <Stack gap="xl">
+      {/* Questions Preview */}
+      {quiz.questions && quiz.questions.length > 0 ? (
+        <Stack gap="lg">
+          <Group justify="space-between" align="center">
+            <Text size="lg" fw={600} c="dimmed">
+              Preview - First {Math.min(3, quiz.questions.length)} Questions
+            </Text>
+            {quiz.questions.length > 3 && (
+              <Badge variant="light" size="lg">
+                +{quiz.questions.length - 3} more questions
+              </Badge>
+            )}
+          </Group>
+
+          {quiz.questions.slice(0, 3).map((question, index) => (
+            <QuestionCard
+              key={question.id}
+              question={question}
+              questionNumber={index + 1}
+            />
+          ))}
+
+          {quiz.questions.length > 3 && (
+            <Card
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              style={{ background: "var(--mantine-color-gray-0)" }}
+            >
+              <Stack align="center" gap="md">
+                <Text size="md" fw={500}>
+                  {quiz.questions.length - 3} more questions available
+                </Text>
+                <Text size="sm" c="dimmed">
+                  Start the quiz to see all questions
+                </Text>
+                <Button variant="light" onClick={handleStartQuiz}>
+                  Start Quiz to See All
+                </Button>
+              </Stack>
+            </Card>
+          )}
+        </Stack>
+      ) : (
+        <Card shadow="sm" padding="xl" radius="md" withBorder>
+          <Stack align="center" gap="md">
+            <Text size="lg" c="dimmed">
+              No questions available for this quiz
+            </Text>
+            <Text size="sm" c="dimmed">
+              Questions may be added by the quiz creator.
+            </Text>
+          </Stack>
+        </Card>
+      )}
+    </Stack>
+  );
+
+  const QuestionsTab = () => (
+    <Stack gap="lg">
+      {quiz.questions && quiz.questions.length > 0 ? (
+        <>
+          <Group justify="space-between" align="center">
+            <Text size="lg" fw={600}>
+              All Questions ({quiz.questions.length})
+            </Text>
+            <Badge variant="light" size="lg">
+              {totalPoints} total points
+            </Badge>
+          </Group>
+
+          {quiz.questions.map((question, index) => (
+            <QuestionCard
+              key={question.id}
+              question={question}
+              questionNumber={index + 1}
+            />
+          ))}
+        </>
+      ) : (
+        <Card shadow="sm" padding="xl" radius="md" withBorder>
+          <Stack align="center" gap="md">
+            <Text size="lg" c="dimmed">
+              No questions available for this quiz
+            </Text>
+            <Text size="sm" c="dimmed">
+              Questions may be added by the quiz creator.
+            </Text>
+          </Stack>
+        </Card>
+      )}
+    </Stack>
+  );
 
   return (
     <Stack gap="xl">
@@ -162,64 +274,40 @@ export function QuizDetail({ quiz }: QuizDetailProps) {
         </Stack>
       </Card>
 
-      {/* Questions Preview */}
-      {quiz.questions && quiz.questions.length > 0 ? (
-        <Stack gap="lg">
-          <Group justify="space-between" align="center">
-            <Text size="lg" fw={600} c="dimmed">
-              Preview - First {Math.min(3, quiz.questions.length)} Questions
-            </Text>
-            {quiz.questions.length > 3 && (
-              <Badge variant="light" size="lg">
-                +{quiz.questions.length - 3} more questions
-              </Badge>
-            )}
-          </Group>
-          
-          {quiz.questions.slice(0, 3).map((question, index) => (
-            <QuestionCard
-              key={question.id}
-              question={question}
-              questionNumber={index + 1}
-            />
-          ))}
-          
-          {quiz.questions.length > 3 && (
-            <Card shadow="sm" padding="lg" radius="md" withBorder style={{ background: 'var(--mantine-color-gray-0)' }}>
-              <Stack align="center" gap="md">
-                <Text size="md" fw={500}>
-                  {quiz.questions.length - 3} more questions available
-                </Text>
-                <Text size="sm" c="dimmed">
-                  Start the quiz to see all questions
-                </Text>
-                <Button variant="light" onClick={handleStartQuiz}>
-                  Start Quiz to See All
-                </Button>
-              </Stack>
-            </Card>
-          )}
-        </Stack>
-      ) : (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Stack align="center" gap="md">
-            <Text size="lg" c="dimmed">
-              No questions available for this quiz
-            </Text>
-            <Text size="sm" c="dimmed">
-              Questions may be added by the quiz creator.
-            </Text>
-          </Stack>
-        </Card>
-      )}
+      {/* Tabbed Content */}
+      <Tabs defaultValue="overview" variant="pills" radius="md">
+        <Tabs.List grow>
+          <Tabs.Tab value="overview" leftSection={<IconEye size={16} />}>
+            Overview
+          </Tabs.Tab>
 
-      {/* User Attempt History */}
-      {isAuthenticated && (
-        <>
-          <Divider size="md" />
-          <AttemptHistory quizId={quiz.id} quizTitle={quiz.title} />
-        </>
-      )}
+          <Tabs.Tab
+            value="leaderboard"
+            leftSection={<IconChartBar size={16} />}
+          >
+            Leaderboard
+          </Tabs.Tab>
+          {isAuthenticated && (
+            <Tabs.Tab value="attempts" leftSection={<IconHistory size={16} />}>
+              My Attempts
+            </Tabs.Tab>
+          )}
+        </Tabs.List>
+
+        <Tabs.Panel value="overview" pt="lg">
+          <OverviewTab />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="leaderboard" pt="lg">
+          <QuizLeaderboard quizId={quiz.id} />
+        </Tabs.Panel>
+
+        {isAuthenticated && (
+          <Tabs.Panel value="attempts" pt="lg">
+            <AttemptHistory quizId={quiz.id} quizTitle={quiz.title} />
+          </Tabs.Panel>
+        )}
+      </Tabs>
     </Stack>
   );
 }

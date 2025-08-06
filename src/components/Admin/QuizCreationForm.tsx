@@ -26,7 +26,7 @@ import {
   IconX,
   IconAlertCircle,
 } from "@tabler/icons-react";
-import { QuizInCreate, QuestionInCreate, OptionInCreate } from "@/types/quiz";
+import { QuizInCreate, QuestionInCreate, OptionInCreate, Quiz } from "@/types/quiz";
 import { quizService } from "@/services/quiz";
 import { tagService } from "@/services/tag";
 import { useEffect } from "react";
@@ -34,22 +34,45 @@ import { useEffect } from "react";
 interface QuizCreationFormProps {
   onSuccess?: (quiz: any) => void;
   onCancel?: () => void;
+  initialQuiz?: Quiz;
+  isEdit?: boolean;
 }
 
 export function QuizCreationForm({
   onSuccess,
   onCancel,
+  initialQuiz,
+  isEdit = false,
 }: QuizCreationFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
-  const [formData, setFormData] = useState<QuizInCreate>({
-    title: "",
-    description: "",
-    is_public: true,
-    tag_names: [],
-    questions: [],
+  const [formData, setFormData] = useState<QuizInCreate>(() => {
+    if (isEdit && initialQuiz) {
+      return {
+        title: initialQuiz.title,
+        description: initialQuiz.description,
+        is_public: initialQuiz.is_public,
+        tag_names: initialQuiz.tags.map(tag => tag.name),
+        questions: (initialQuiz.questions || []).map(q => ({
+          question_text: q.question_text,
+          question_type: q.question_type,
+          points: q.points,
+          options: q.options.map(opt => ({
+            option_text: opt.option_text,
+            is_correct: opt.is_correct
+          }))
+        }))
+      };
+    }
+    return {
+      title: "",
+      description: "",
+      is_public: true,
+      tag_names: [],
+      questions: [],
+    };
   });
 
   useEffect(() => {
@@ -183,10 +206,16 @@ export function QuizCreationForm({
         }
       }
 
-      const createdQuiz = await quizService.createQuiz(formData);
-      onSuccess?.(createdQuiz);
+      let resultQuiz;
+      if (isEdit && initialQuiz) {
+        resultQuiz = await quizService.updateQuiz(initialQuiz.id, formData);
+      } else {
+        resultQuiz = await quizService.createQuiz(formData);
+      }
+      onSuccess?.(resultQuiz);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create quiz");
+      const errorMessage = isEdit ? "Failed to update quiz" : "Failed to create quiz";
+      setError(err instanceof Error ? err.message : errorMessage);
     } finally {
       setLoading(false);
     }
@@ -195,9 +224,9 @@ export function QuizCreationForm({
   return (
     <Stack gap="lg">
       <div>
-        <Title order={3}>Create New Quiz</Title>
+        <Title order={3}>{isEdit ? 'Edit Quiz' : 'Create New Quiz'}</Title>
         <Text size="sm" c="dimmed">
-          Create a comprehensive quiz with multiple question types
+          {isEdit ? 'Edit your quiz details, questions, and options' : 'Create a comprehensive quiz with multiple question types'}
         </Text>
       </div>
 
@@ -499,7 +528,7 @@ export function QuizCreationForm({
           loading={loading}
           disabled={formData.questions.length === 0}
         >
-          Create Quiz
+          {isEdit ? 'Update Quiz' : 'Create Quiz'}
         </Button>
       </Group>
     </Stack>

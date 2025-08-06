@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Stack,
   Title,
@@ -34,6 +35,7 @@ import { quizService } from "@/services/quiz";
 import { QuizCreationForm } from "./QuizCreationForm";
 
 export function QuizManagement() {
+  const router = useRouter();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,8 @@ export function QuizManagement() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [quizToDelete, setQuizToDelete] = useState<Quiz | null>(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [quizToEdit, setQuizToEdit] = useState<Quiz | null>(null);
 
   const fetchQuizzes = async () => {
     try {
@@ -102,11 +106,54 @@ export function QuizManagement() {
     setShowCreateForm(false);
   };
 
+  const handleViewDetails = (quiz: Quiz) => {
+    router.push(`/quiz/${quiz.id}`);
+  };
+
+  const handleEditQuiz = async (quiz: Quiz) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Fetch complete quiz data with questions
+      const fullQuizData = await quizService.getQuizById(quiz.id);
+      setQuizToEdit(fullQuizData);
+      setShowEditForm(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch quiz details"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuizUpdated = (updatedQuiz: Quiz) => {
+    setQuizzes((prev) =>
+      prev.map((q) => (q.id === updatedQuiz.id ? updatedQuiz : q))
+    );
+    setShowEditForm(false);
+    setQuizToEdit(null);
+  };
+
   if (showCreateForm) {
     return (
       <QuizCreationForm
         onSuccess={handleQuizCreated}
         onCancel={() => setShowCreateForm(false)}
+      />
+    );
+  }
+
+  if (showEditForm && quizToEdit) {
+    return (
+      <QuizCreationForm
+        onSuccess={handleQuizUpdated}
+        onCancel={() => {
+          setShowEditForm(false);
+          setQuizToEdit(null);
+        }}
+        initialQuiz={quizToEdit}
+        isEdit={true}
       />
     );
   }
@@ -201,7 +248,6 @@ export function QuizManagement() {
                   <Table.Th>Title</Table.Th>
                   <Table.Th>Creator</Table.Th>
                   <Table.Th>Status</Table.Th>
-                  <Table.Th>Questions</Table.Th>
                   <Table.Th>Tags</Table.Th>
                   <Table.Th>Created</Table.Th>
                   <Table.Th>Actions</Table.Th>
@@ -234,11 +280,7 @@ export function QuizManagement() {
                         {quiz.is_public ? "Public" : "Private"}
                       </Badge>
                     </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">
-                        {quiz.questions?.length || 0} questions
-                      </Text>
-                    </Table.Td>
+
                     <Table.Td>
                       <Group gap="xs">
                         {quiz.tags.slice(0, 2).map((tag) => (
@@ -264,10 +306,16 @@ export function QuizManagement() {
                           </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                          <Menu.Item leftSection={<IconEye size={14} />}>
+                          <Menu.Item
+                            leftSection={<IconEye size={14} />}
+                            onClick={() => handleViewDetails(quiz)}
+                          >
                             View Details
                           </Menu.Item>
-                          <Menu.Item leftSection={<IconEdit size={14} />}>
+                          <Menu.Item
+                            leftSection={<IconEdit size={14} />}
+                            onClick={() => handleEditQuiz(quiz)}
+                          >
                             Edit Quiz
                           </Menu.Item>
                           <Menu.Divider />
